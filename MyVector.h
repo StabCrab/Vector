@@ -1,6 +1,11 @@
 #pragma once
 #include <cstdlib>
+#include <cmath>
 // стратегия изменения capacity
+enum class SortedStrategy {
+    Ascending,
+    Descending
+};
 enum class ResizeStrategy {
 	Additive,
 	Multiplicative
@@ -13,11 +18,13 @@ using ValueType = double;
 class MyVector
 {
 public:
+    class Iterator;
 	MyVector(size_t size = 0, ResizeStrategy = ResizeStrategy::Multiplicative, float coef = 1.5f);
 	MyVector(size_t size, ValueType value, ResizeStrategy = ResizeStrategy::Multiplicative, float coef = 1.5f);
-	
+	MyVector(MyVector &&moveVec) noexcept ;
 	MyVector(const MyVector& copy);
-	MyVector& operator=(const MyVector& copy);
+	MyVector& operator=(MyVector& copy);
+
 
 	~MyVector();
 
@@ -63,9 +70,26 @@ public:
 
 	// очистка вектора, без изменения capacity
 	void clear();
+	Iterator begin();
+	Iterator end();
+	ValueType getValue(Iterator i);
+	void setValue(Iterator i, ValueType value);
+    void sortedSquares(SortedStrategy strategy);
 private:
 	ValueType* _data;
 	size_t _size;
 	size_t _capacity;
 };
-
+class MyVector :: Iterator
+{
+public:
+    Iterator(ValueType *ptr);
+    ~Iterator();
+    bool operator==(const Iterator &i);
+    bool operator!=(const Iterator &i);
+    Iterator &operator++();
+    Iterator &operator--();
+private:
+    ValueType* ptr;
+    friend class MyVector;
+};
