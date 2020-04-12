@@ -8,7 +8,7 @@ MyVector::MyVector(size_t size, ResizeStrategy resizeStrategy, float coef)
     {
         this->_size = size;
         this->_capacity = 1;
-        this->_data = new ValueType(size);
+        this->_data = new ValueType[size];
         this->strategy = resizeStrategy;
     }
     else
@@ -17,7 +17,7 @@ MyVector::MyVector(size_t size, ResizeStrategy resizeStrategy, float coef)
         {
             this->_size = size;
             this->_capacity = round(coef);
-            this->_data = new ValueType(size);
+            this->_data = new ValueType[size];
             this->strategy = ResizeStrategy::Additive;
             for (int i = 0; i < size; i++)
             {
@@ -44,7 +44,7 @@ MyVector::MyVector(size_t size, ValueType value, ResizeStrategy resizeStrategy, 
     {
         this->_size = size;
         this->_capacity = 1;
-        this->_data = new ValueType(size);
+        this->_data = new ValueType[size];
         this->strategy = resizeStrategy;
     }
     else
@@ -53,7 +53,7 @@ MyVector::MyVector(size_t size, ValueType value, ResizeStrategy resizeStrategy, 
         {
             this->_size = size;
             this->_capacity = size;
-            this->_data = new ValueType(size);
+            this->_data = new ValueType[size];
             this->strategy = ResizeStrategy::Additive;
             for (int i = 0; i < size; i++)
             {
@@ -76,23 +76,26 @@ MyVector::MyVector(size_t size, ValueType value, ResizeStrategy resizeStrategy, 
 
 MyVector::MyVector(const MyVector &copy)
 {
-    this->_data = new ValueType(copy._size);
+    ValueType* newData = new ValueType(copy._size);
     for (int i = 0; i < copy._size; i++)
     {
-        this->_data[i] = copy._data[i];
+        newData[i] = copy._data[i];
         //std:: cout << _data[i] <<std::endl;
     }
+    this->_data = newData;
     this->strategy = copy.strategy;
     this->_capacity = copy._capacity;
     this->_size = copy._size;
 }
 
 MyVector &MyVector::operator = (MyVector &copy){
-    this->_data = new ValueType(copy._size);
-    for (int i = 0; i < copy.size(); i++)
+    ValueType* newData = new ValueType(copy._size);
+    for (int i = 0; i < copy._size; i++)
     {
-        this->_data[i] = copy._data[i];
+        newData[i] = copy._data[i];
+        //std:: cout << _data[i] <<std::endl;
     }
+    this->_data = newData;
     this->strategy = copy.strategy;
     this->_capacity = copy._capacity;
     this->_size = copy._size;
@@ -100,8 +103,7 @@ MyVector &MyVector::operator = (MyVector &copy){
 
 MyVector::~MyVector()
 {
-    this->_data = nullptr;
-    delete[] this->_data;
+    delete[] _data;
 }
 
 size_t MyVector::capacity() const {
@@ -278,6 +280,7 @@ void MyVector::reserve(const size_t capacity)
     {
         newValue[i] = this->_data[i];
     }
+    delete[] this->_data;
     this->_data = newValue;
 }
 
@@ -371,38 +374,38 @@ void MyVector::setValue(MyVector::Iterator i, ValueType value)
 }
 
 void MyVector::sortedSquares( SortedStrategy strategy) {
-    MyVector vec (*this);
+    ValueType* vec  = new ValueType[this->_size];
     if (strategy == SortedStrategy::Descending)
     {
         int i = 0;
         int j = this->size() - 1;
         int k = 0;
-        while(vec._data[i] < 0 && vec._data[j] >= 0)
+        while(this->_data[i] < 0 && this->_data[j] >= 0)
         {
-            if (abs(vec._data[i]) >= abs(vec._data[j]))
+            if (abs(this->_data[i]) >= abs(this->_data[j]))
             {
-                this->_data[k] = vec._data[i] * vec._data[i];
+                vec[k] = this->_data[i] * this->_data[i];
                 //std:: cout << vector._data[k] << std::endl;
                 i++;
                 k++;
             }
             else
             {
-                this->_data[k] = vec._data[j] * vec._data[j];
+                vec[k] = this->_data[j] * this->_data[j];
                 //std:: cout << vector._data[k] << std:: endl;
                 j--;
                 k++;
             }
         }
-        while(vec._data[i] < 0)
+        while(this->_data[i] < 0)
         {
-            this->_data[k] = vec._data[i] * vec._data[i];
+            vec[k] = this->_data[i] * this->_data[i];
             i++;
             k++;
         }
-        while(vec._data[j] >= 0)
+        while(this->_data[j] >= 0)
         {
-            this->_data[k] = vec._data[j] * vec._data[j];
+            vec[k] = this->_data[j] * this->_data[j];
             j--;
             k++;
         }
@@ -413,36 +416,38 @@ void MyVector::sortedSquares( SortedStrategy strategy) {
         int i = 0;
         int j = this->size() - 1;
         int k = this->size() - 1;
-        while(vec._data[i] < 0 && vec._data[j] >= 0)
+        while(this->_data[i] < 0 && this->_data[j] >= 0)
         {
-            if (abs(vec._data[i]) >= abs(vec._data[j]))
+            if (abs(this->_data[i]) >= abs(this->_data[j]))
             {
-                this->_data[k] = vec._data[i] * vec._data[i];
+                vec[k] = this->_data[i] * this->_data[i];
                 //std:: cout << vector._data[k] << std::endl;
                 i++;
                 k--;
             }
             else
             {
-                this->_data[k] = vec._data[j] * vec._data[j];
+                vec[k] = this->_data[j] * this->_data[j];
                 //std:: cout << vector._data[k] << std:: endl;
                 j--;
                 k--;
             }
         }
-        while(vec._data[i] < 0)
+        while(this->_data[i] < 0)
         {
-            this->_data[k] = vec._data[i] * vec._data[i];
+            vec[k] = this->_data[i] * this->_data[i];
             i++;
             k--;
         }
-        while(vec._data[j] >= 0)
+        while(this->_data[j] >= 0)
         {
-            this->_data[k] = vec._data[j] * vec._data[j];
+            vec[k] = this->_data[j] * this->_data[j];
             j--;
             k--;
         }
     }
+    delete[] this->_data;
+    this->_data = vec;
 }
 
 MyVector::MyVector(MyVector &&moveVec) noexcept
