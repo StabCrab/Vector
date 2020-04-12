@@ -100,7 +100,8 @@ MyVector &MyVector::operator = (MyVector &copy){
 
 MyVector::~MyVector()
 {
-    //delete[] this->_data;
+    this->_data = nullptr;
+    delete[] this->_data;
 }
 
 size_t MyVector::capacity() const {
