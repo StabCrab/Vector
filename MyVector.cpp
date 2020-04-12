@@ -1,7 +1,6 @@
 #include <cstring>
 #include "MyVector.h"
 #include "iostream"
-#include <cmath>
 
 MyVector::MyVector(size_t size, ResizeStrategy resizeStrategy, float coef)
 {
@@ -10,14 +9,16 @@ MyVector::MyVector(size_t size, ResizeStrategy resizeStrategy, float coef)
         this->_size = size;
         this->_capacity = 1;
         this->_data = new ValueType(size);
+        this->strategy = resizeStrategy;
     }
     else
     {
         if (resizeStrategy == ResizeStrategy::Additive)
         {
             this->_size = size;
-            this->_capacity = size;
+            this->_capacity = round(coef);
             this->_data = new ValueType(size);
+            this->strategy = ResizeStrategy::Additive;
             for (int i = 0; i < size; i++)
             {
                 this->_data[i] = 0.0;
@@ -26,8 +27,9 @@ MyVector::MyVector(size_t size, ResizeStrategy resizeStrategy, float coef)
         else
         {
             this->_size = size;
-            this->_capacity = size * coef;
+            this->_capacity = round(size * coef);
             this->_data = new ValueType();
+            this->strategy = ResizeStrategy :: Multiplicative;
             for (int i = 0; i < size; i++)
             {
                 this->_data[i] = 0.0;
@@ -43,6 +45,7 @@ MyVector::MyVector(size_t size, ValueType value, ResizeStrategy resizeStrategy, 
         this->_size = size;
         this->_capacity = 1;
         this->_data = new ValueType(size);
+        this->strategy = resizeStrategy;
     }
     else
     {
@@ -51,9 +54,10 @@ MyVector::MyVector(size_t size, ValueType value, ResizeStrategy resizeStrategy, 
             this->_size = size;
             this->_capacity = size;
             this->_data = new ValueType(size);
+            this->strategy = ResizeStrategy::Additive;
             for (int i = 0; i < size; i++)
             {
-                this->_data[i] = 0.0;
+                this->_data[i] = value;
             }
         }
         else
@@ -61,9 +65,10 @@ MyVector::MyVector(size_t size, ValueType value, ResizeStrategy resizeStrategy, 
             this->_size = size;
             this->_capacity = size * coef;
             this->_data = new ValueType();
+            this->strategy = ResizeStrategy::Multiplicative;
             for (int i = 0; i < size; i++)
             {
-                this->_data[i] = 0.0;
+                this->_data[i] = value;
             }
         }
     }
@@ -75,19 +80,20 @@ MyVector::MyVector(const MyVector &copy)
     for (int i = 0; i < copy._size; i++)
     {
         this->_data[i] = copy._data[i];
-        std:: cout << _data[i] <<std::endl;
+        //std:: cout << _data[i] <<std::endl;
     }
+    this->strategy = copy.strategy;
     this->_capacity = copy._capacity;
     this->_size = copy._size;
 }
 
 MyVector &MyVector::operator = (MyVector &copy){
-    ValueType* Copy = new ValueType(copy._size);
+    this->_data = new ValueType(copy._size);
     for (int i = 0; i < copy.size(); i++)
     {
-        Copy[i] = copy._data[i];
+        this->_data[i] = copy._data[i];
     }
-    this->_data = Copy;
+    this->strategy = copy.strategy;
     this->_capacity = copy._capacity;
     this->_size = copy._size;
 }
@@ -155,7 +161,7 @@ void MyVector::insert(const size_t i, const ValueType &value)
         }
         this->_data = newData;
         this->_size++;
-     }
+    }
 }
 
 void MyVector::insert(const size_t i, const MyVector &value)
